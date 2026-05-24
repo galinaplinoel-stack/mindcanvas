@@ -1,0 +1,28 @@
+# MindCanvas Configuration
+
+api:
+  host: "0.0.0.0"
+  port: 8002
+  debug: false
+
+generator:
+  default_depth: 3
+  max_branches: 6
+  max_sub_branches: 3
+  ai_enabled: false
+
+layout:
+  algorithm: "radial"
+  spacing: 200
+  center_offset: 0
+
+canvas:
+  width: 2000
+  height: 1500
+  snap_to_grid: false
+  grid_size: 20
+
+export:
+  default_format: "json"
+  svg_width: 1000
+  svg_height: 800
