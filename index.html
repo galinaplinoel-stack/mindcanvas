@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCanvas — AI Mind Mapping</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#08080c;--s1:#111118;--s2:#1a1a25;--ac:#f97316;--ac2:#fb923c;--ac3:#fdba74;--em:#eab308;--t:#e2e8f0;--m:#64748b;--bd:#2a2a3a}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
+        .g-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;background:radial-gradient(ellipse at 40% 30%,rgba(249,115,22,.1) 0%,transparent 50%),radial-gradient(ellipse at 60% 70%,rgba(234,179,8,.08) 0%,transparent 50%)}
+        nav{position:sticky;top:0;z-index:100;padding:1rem 2rem;background:rgba(8,8,12,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+        .logo{font-family:'Space Grotesk';font-weight:700;font-size:1.5rem}.logo span{background:linear-gradient(135deg,var(--ac),var(--em));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nl{display:flex;gap:1.5rem;list-style:none}.nl a{color:var(--m);text-decoration:none;transition:.3s;font-size:.9rem}.nl a:hover{color:var(--ac3)}
+        .ct{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:2rem}
+        .hero{text-align:center;padding:5rem 2rem 3rem}
+        .hero h1{font-family:'Space Grotesk';font-size:clamp(2.5rem,6vw,4rem);font-weight:700;line-height:1.1;margin-bottom:1.5rem}
+        .hero h1 .gr{background:linear-gradient(135deg,#f97316,#fb923c,#fdba74,#eab308);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{font-size:1.15rem;color:var(--m);max-width:600px;margin:0 auto 2rem;line-height:1.7}
+        .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;border-radius:12px;font-weight:600;font-size:1rem;cursor:pointer;border:none;transition:all .3s;text-decoration:none}
+        .btn-p{background:linear-gradient(135deg,var(--ac),var(--em));color:#fff;box-shadow:0 4px 20px rgba(249,115,22,.35)}.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(249,115,22,.45)}
+        .btn-g{background:0 0;color:var(--t);border:1px solid var(--bd)}.btn-g:hover{border-color:var(--ac)}
+        .canvas-area{background:var(--s1);border:1px solid var(--bd);border-radius:20px;margin:2rem 0;overflow:hidden}
+        .toolbar{display:flex;gap:.75rem;padding:1rem 1.5rem;border-bottom:1px solid var(--bd);flex-wrap:wrap;align-items:center;background:var(--s2)}
+        .tool-btn{padding:.5rem 1rem;border-radius:8px;border:1px solid var(--bd);background:var(--s1);color:var(--m);cursor:pointer;font-size:.85rem;transition:.3s;display:flex;align-items:center;gap:.3rem}
+        .tool-btn:hover,.tool-btn.active{border-color:var(--ac);color:var(--ac3);background:rgba(249,115,22,.1)}
+        .sep{width:1px;height:24px;background:var(--bd)}
+        #canvas{width:100%;height:500px;position:relative;overflow:hidden;cursor:grab}
+        #canvas:active{cursor:grabbing}
+        .node{position:absolute;min-width:120px;padding:.75rem 1.2rem;border-radius:12px;font-size:.9rem;cursor:move;user-select:none;transition:box-shadow .3s;text-align:center;font-weight:500}
+        .node:hover{box-shadow:0 0 20px rgba(249,115,22,.3)}
+        .node.center{background:linear-gradient(135deg,var(--ac),var(--em));color:#fff;font-size:1.1rem;font-weight:700;font-family:'Space Grotesk';min-width:160px;border-radius:16px}
+        .node.branch{background:var(--s2);border:2px solid var(--ac);color:var(--t)}
+        .node.leaf{background:var(--s2);border:1px solid var(--bd);color:var(--m);font-size:.8rem}
+        .node .del{position:absolute;top:-8px;right:-8px;width:20px;height:20px;background:#ef4444;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;color:#fff;border:2px solid var(--bg)}
+        .node:hover .del{display:flex}
+        svg.lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+        .line{stroke:var(--ac);stroke-width:2;fill:none;opacity:.5}
+        .input-panel{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:2rem;margin:2rem 0}
+        .input-panel h2{font-family:'Space Grotesk';font-size:1.5rem;margin-bottom:1rem;text-align:center}
+        .input-row{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+        .input-row input,.input-row select{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:.75rem 1rem;color:var(--t);font-family:inherit;font-size:.95rem;outline:0}
+        .input-row input:focus,.input-row select:focus{border-color:var(--ac)}
+        .templates{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin:2rem 0}
+        .tpl-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:1.5rem;cursor:pointer;transition:all .3s}.tpl-card:hover{border-color:var(--ac);transform:translateY(-3px)}
+        .tpl-card .icon{font-size:2rem;margin-bottom:.75rem}.tpl-card h3{font-family:'Space Grotesk';font-size:1.1rem;margin-bottom:.5rem}.tpl-card p{color:var(--m);font-size:.85rem;line-height:1.5}
+        .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;padding:3rem 0}
+        .card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:2rem;transition:all .3s}.card:hover{border-color:var(--ac);transform:translateY(-4px)}
+        .ci{font-size:2.5rem;margin-bottom:1rem}.card h3{font-family:'Space Grotesk';font-size:1.2rem;margin-bottom:.75rem}.card p{color:var(--m);line-height:1.6}
+        footer{text-align:center;padding:3rem;color:var(--m);font-size:.85rem;border-top:1px solid var(--bd)}
+        @media(max-width:768px){#canvas{height:400px}.toolbar{padding:.75rem}nav{padding:.75rem 1rem}}
+    </style>
+</head>
+<body>
+<div class="g-bg"></div>
+<nav><div class="logo"><span>🧠 MindCanvas</span></div><ul class="nl"><li><a href="#canvas-section">Canvas</a></li><li><a href="#templates">Templates</a></li><li><a href="#features">Features</a></li></ul></nav>
+<div class="ct">
+<section class="hero">
+<h1>Visualize Your<br><span class="gr">AI Mind Maps</span></h1>
+<p>Interactive mind mapping powered by AI. Generate ideas, organize thoughts, and visualize connections on an infinite canvas.</p>
+<div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap"><a href="#canvas-section" class="btn btn-p">🧠 Start Mapping</a><a href="#templates" class="btn btn-g">Browse Templates</a></div>
+</section>
+<section id="canvas-section">
+<div class="input-panel">
+<h2>⚡ Quick Generate</h2>
+<div class="input-row">
+<input type="text" id="topicInput" placeholder="Enter a topic... e.g. &quot;AI startup ideas&quot; or &quot;Project planning&quot;">
+<select id="depthSelect"><option value="2">Depth: 2 levels</option><option value="3" selected>Depth: 3 levels</option><option value="4">Depth: 4 levels</option></select>
+<button class="btn btn-p" onclick="generateMap()" style="flex:none">⚡ Generate</button>
+</div>
+</div>
+<div class="canvas-area">
+<div class="toolbar">
+<button class="tool-btn active" onclick="setTool(this,'move')">🖐️ Move</button>
+<button class="tool-btn" onclick="setTool(this,'add')">➕ Add Node</button>
+<button class="tool-btn" onclick="setTool(this,'connect')">🔗 Connect</button>
+<div class="sep"></div>
+<button class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+<button class="tool-btn" onclick="exportMap()">📷 Export</button>
+<button class="tool-btn" onclick="autoLayout()">✨ Auto Layout</button>
+<div class="sep"></div>
+<select style="background:var(--s1);color:var(--m);border:1px solid var(--bd);border-radius:8px;padding:.4rem .8rem;font-size:.8rem" id="colorPicker">
+<option value="#f97316">🟠 Orange</option><option value="#3b82f6">🔵 Blue</option><option value="#10b981">🟢 Green</option><option value="#8b5cf6">🟣 Purple</option><option value="#ef4444">🔴 Red</option><option value="#eab308">🟡 Yellow</option></select>
+</div>
+<div id="canvas"><svg class="lines" id="svgLines"></svg></div>
+</div>
+</section>
+<section id="templates">
+<h2 style="font-family:'Space Grotesk';font-size:1.8rem;text-align:center;margin-bottom:.5rem">📐 Template Gallery</h2>
+<p style="text-align:center;color:var(--m);margin-bottom:1rem">Click to load a pre-built mind map</p>
+<div class="templates">
+<div class="tpl-card" onclick="loadTemplate('startup')"><div class="icon">🚀</div><h3>Startup Brainstorm</h3><p>Ideas, market research, team, funding, MVP features, and growth strategy.</p></div>
+<div class="tpl-card" onclick="loadTemplate('project')"><div class="icon">📋</div><h3>Project Planning</h3><p>Goals, milestones, tasks, resources, risks, and timeline organization.</p></div>
+<div class="tpl-card" onclick="loadTemplate('study')"><div class="icon">📚</div><h3>Study Notes</h3><p>Main topic, subtopics, key concepts, examples, and review points.</p></div>
+<div class="tpl-card" onclick="loadTemplate('creative')"><div class="icon">🎨</div><h3>Creative Process</h3><p>Inspiration, research, ideation, prototyping, feedback, and iteration.</p></div>
+<div class="tpl-card" onclick="loadTemplate('decision')"><div class="icon">⚖️</div><h3>Decision Matrix</h3><p>Options, pros, cons, criteria, scores, and final recommendation.</p></div>
+<div class="tpl-card" onclick="loadTemplate('swot')"><div class="icon">📊</div><h3>SWOT Analysis</h3><p>Strengths, weaknesses, opportunities, and threats breakdown.</p></div>
+</div>
+</section>
+<section id="features"><div class="feat">
+<div class="card"><div class="ci">🧠</div><h3>AI Generation</h3><p>Enter any topic and AI generates a complete mind map with branches, subtopics, and connections.</p></div>
+<div class="card"><div class="ci">🎨</div><h3>Infinite Canvas</h3><p>Unlimited workspace with drag, zoom, and pan. Build as complex as your ideas need.</p></div>
+<div class="card"><div class="ci">🔗</div><h3>Smart Connections</h3><p>Draw connections between any nodes. AI suggests related concepts you might have missed.</p></div>
+<div class="card"><div class="ci">📐</div><h3>Auto Layout</h3><p>One-click smart arrangement. AI organizes nodes for optimal readability and flow.</p></div>
+<div class="card"><div class="ci">📷</div><h3>Export & Share</h3><p>Export as PNG, share links, or embed in documents. Your mind maps go where you go.</p></div>
+<div class="card"><div class="ci">⚡</div><h3>Templates</h3><p>Pre-built templates for common use cases: brainstorming, planning, analysis, and more.</p></div>
+</div></section>
+</div>
+<footer><p>MindCanvas — AI Mind Mapping. Organize your thoughts with AI. ❤️</p></footer>
+<script>
+let nodes=[],lines=[],currentTool='move',selectedNode=null,connectingFrom=null,dragging=false,dragOffset={x:0,y:0},nodeId=0;
+const canvas=document.getElementById('canvas');
+const svg=document.getElementById('svgLines');
+
+function createNode(x,y,text,type='branch',color=null){
+const id='n'+(nodeId++);
+const el=document.createElement('div');
+el.className='node '+(type||'branch');
+el.id=id;el.textContent=text;
+el.style.left=x+'px';el.style.top=y+'px';
+if(color)el.style.borderColor=color;
+const del=document.createElement('div');del.className='del';del.textContent='×';del.onclick=e=>{e.stopPropagation();removeNode(id)};
+el.appendChild(del);
+el.onmousedown=e=>{if(currentTool==='connect'){if(connectingFrom&&connectingFrom!==id){addLine(connectingFrom,id);connectingFrom=null;el.style.outline='none'}else{connectingFrom=id;el.style.outline='2px solid var(--ac3)'}return}if(currentTool!=='move')return;dragging=true;selectedNode=id;const r=canvas.getBoundingClientRect();dragOffset={x:e.clientX-r.left-parseInt(el.style.left),y:e.clientY-r.top-parseInt(el.style.top)};e.preventDefault()};
+canvas.appendChild(el);nodes.push({id,x,y,text,type,color});return id}
+function removeNode(id){document.getElementById(id)?.remove();nodes=nodes.filter(n=>n.id!==id);lines=lines.filter(l=>l.from!==id&&l.to!==id);renderLines()}
+function addLine(from,to){if(lines.find(l=>(l.from===from&&l.to===to)||(l.from===to&&l.to===from)))return;lines.push({from,to});renderLines()}
+function renderLines(){svg.innerHTML='';lines.forEach(l=>{const a=document.getElementById(l.from),b=document.getElementById(l.to);if(!a||!b)return;const ax=parseInt(a.style.left)+a.offsetWidth/2,ay=parseInt(a.style.top)+a.offsetHeight/2,bx=parseInt(b.style.left)+b.offsetWidth/2,by=parseInt(b.style.top)+b.offsetHeight/2;const cx=(ax+bx)/2,cy=Math.min(ay,by)-40;svg.innerHTML+=`<path class="line" d="M${ax},${ay} Q${cx},${cy} ${bx},${by}"/>`})}
+canvas.onmousemove=e=>{if(!dragging||!selectedNode)return;const r=canvas.getBoundingClientRect();const el=document.getElementById(selectedNode);el.style.left=(e.clientX-r.left-dragOffset.x)+'px';el.style.top=(e.clientY-r.top-dragOffset.y)+'px';const n=nodes.find(n=>n.id===selectedNode);if(n){n.x=parseInt(el.style.left);n.y=parseInt(el.style.top)}renderLines()};
+canvas.onmouseup=()=>{dragging=false;selectedNode=null};
+canvas.onclick=e=>{if(currentTool!=='add')return;const r=canvas.getBoundingClientRect();const text=prompt('Node text:');if(text)createNode(e.clientX-r.left-60,e.clientY-r.top-20,text)};
+function setTool(el,tool){document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');currentTool=tool}
+function clearCanvas(){if(!confirm('Clear all nodes?'))return;nodes.forEach(n=>document.getElementById(n.id)?.remove());nodes=[];lines=[];svg.innerHTML='';nodeId=0}
+function exportMap(){alert('💡 Tip: Use browser screenshot (Ctrl+Shift+S) or screenshot tool to capture your mind map!')}
+function autoLayout(){if(!nodes.length)return;const center=nodes.find(n=>n.type==='center');if(!center)return;const cx=canvas.offsetWidth/2,cy=canvas.offsetHeight/2;const el=document.getElementById(center.id);el.style.left=(cx-el.offsetWidth/2)+'px';el.style.top=(cy-el.offsetHeight/2)+'px';center.x=cx-el.offsetWidth/2;center.y=cy-el.offsetHeight/2;const branches=nodes.filter(n=>n.type==='branch');const angleStep=(2*Math.PI)/Math.max(branches.length,1);branches.forEach((b,i)=>{const angle=angleStep*i-Math.PI/2;const r=200;const bx=cx+r*Math.cos(angle)-60;const by=cy+r*Math.sin(angle)-20;const bel=document.getElementById(b.id);bel.style.left=bx+'px';bel.style.top=by+'px';b.x=bx;b.y=by;const leaves=nodes.filter(l=>l.type==='leaf'&&lines.find(ln=>ln.from===b.id&&ln.to===l.id));leaves.forEach((l,j)=>{const la=angle+(j-1)*0.3;const lr=130;const lx=bx+60+lr*Math.cos(la)-40;const ly=by+20+lr*Math.sin(la)-15;const lel=document.getElementById(l.id);lel.style.left=lx+'px';lel.style.top=ly+'px';l.x=lx;l.y=ly})});renderLines()}
+
+function generateMap(){
+const topic=document.getElementById('topicInput').value.trim();if(!topic)return;
+clearCanvasSilent();
+const cx=canvas.offsetWidth/2,cy=canvas.offsetHeight/2;
+const centerId=createNode(cx-80,cy-25,topic,'center');
+const aiBranches={
+'AI startup ideas':['Chatbot Platform','AI Writing Tool','Image Generator','Code Assistant','Data Analytics','Voice AI'],
+'Project planning':['Goals','Timeline','Resources','Risks','Milestones','Budget'],
+'Default':['Idea 1','Idea 2','Idea 3','Idea 4','Idea 5','Idea 6']
+};
+const subIdeas={
+'Idea 1':['Research','Prototype','Test'],'Idea 2':['Research','Prototype','Test'],'Idea 3':['Research','Prototype','Test'],
+'Chatbot Platform':['NLP','UI/UX','API'],'AI Writing Tool':['GPT Integration','Templates','SEO'],'Image Generator':['Diffusion Models','Style Transfer','Gallery'],
+'Code Assistant':['Autocomplete','Debug','Refactor'],'Data Analytics':['Dashboards','ML Models','Reports'],'Voice AI':['TTS','STT','Voice Clone'],
+'Goals':['Short-term','Long-term','KPIs'],'Timeline':['Phase 1','Phase 2','Phase 3'],'Resources':['Team','Tools','Budget'],
+'Risks':['Technical','Market','Financial'],'Milestones':['MVP','Beta','Launch'],'Budget':['Development','Marketing','Operations']
+};
+const lc=topic.toLowerCase();
+const branches=Object.keys(aiBranches).find(k=>lc.includes(k.toLowerCase().split(' ')[0]))?aiBranches[Object.keys(aiBranches).find(k=>lc.includes(k.toLowerCase().split(' ')[0]))]:aiBranches['Default'];
+const angleStep=(2*Math.PI)/branches.length;
+branches.forEach((b,i)=>{
+const angle=angleStep*i-Math.PI/2;
+const bx=cx+200*Math.cos(angle)-60,by=cy+200*Math.sin(angle)-20;
+const bid=createNode(bx,by,b,'branch');
+addLine(centerId,bid);
+const subs=subIdeas[b]||['Research','Prototype','Test'];
+subs.forEach((s,j)=>{
+const sa=angle+(j-1)*0.35;
+const sx=bx+60+130*Math.cos(sa)-40,sy=by+20+130*Math.sin(sa)-15;
+const sid=createNode(sx,sy,s,'leaf');
+addLine(bid,sid);
+});
+});
+}
+
+function clearCanvasSilent(){nodes.forEach(n=>document.getElementById(n.id)?.remove());nodes=[];lines=[];svg.innerHTML='';nodeId=0}
+
+function loadTemplate(type){
+clearCanvasSilent();
+const cx=canvas.offsetWidth/2,cy=canvas.offsetHeight/2;
+const templates={
+startup:{center:'AI Startup',branches:[{name:'Product',subs:['MVP','Features','Tech Stack']},{name:'Market',subs:['Target Users','Competition','Size']},{name:'Team',subs:['Founders','Engineers','Advisors']},{name:'Funding',subs:['Bootstrapping','Angel','VC']},{name:'Growth',subs:['Marketing','Sales','Partnerships']},{name:'Revenue',subs:['SaaS','Freemium','Enterprise']}]},
+project:{center:'Project Plan',branches:[{name:'Scope',subs:['Requirements','Deliverables','Constraints']},{name:'Timeline',subs:['Sprint 1','Sprint 2','Launch']},{name:'Team',subs:['Dev','Design','QA']},{name:'Risks',subs:['Technical','Resource','Schedule']},{name:'Tools',subs:['Git','CI/CD','Monitoring']},{name:'Goals',subs:['KPIs','Metrics','Review']}]},
+study:{center:'Study Topic',branches:[{name:'Fundamentals',subs:['Concepts','Definitions','History']},{name:'Core Theory',subs:['Principles','Models','Frameworks']},{name:'Practice',subs:['Exercises','Projects','Labs']},{name:'Advanced',subs:['Research','Trends','Case Studies']},{name:'Resources',subs:['Books','Videos','Papers']},{name:'Review',subs:['Summary','Quiz','Flashcards']}]},
+creative:{center:'Creative Project',branches:[{name:'Inspiration',subs:['Mood Board','References','Art']},{name:'Research',subs:['Audience','Trends','Analysis']},{name:'Ideation',subs:['Brainstorm','Sketch','Prototype']},{name:'Execution',subs:['Design','Build','Polish']},{name:'Feedback',subs:['Testing','Review','Iteration']},{name:'Launch',subs:['Publish','Promote','Measure']}]},
+decision:{center:'Decision',branches:[{name:'Option A',subs:['Pros','Cons','Score']},{name:'Option B',subs:['Pros','Cons','Score']},{name:'Option C',subs:['Pros','Cons','Score']},{name:'Criteria',subs:['Cost','Impact','Risk']},{name:'Research',subs:['Data','Opinions','Examples']},{name:'Verdict',subs:['Best Choice','Why','Next Steps']}]},
+swot:{center:'SWOT Analysis',branches:[{name:'💪 Strengths',subs:['Advantage 1','Advantage 2','Advantage 3']},{name:'⚠️ Weaknesses',subs:['Gap 1','Gap 2','Gap 3']},{name:'🌟 Opportunities',subs:['Trend 1','Trend 2','Trend 3']},{name:'🔴 Threats',subs:['Risk 1','Risk 2','Risk 3']}]}
+};
+const t=templates[type];if(!t)return;
+const centerId=createNode(cx-80,cy-25,t.center,'center');
+const angleStep=(2*Math.PI)/t.branches.length;
+t.branches.forEach((b,i)=>{
+const angle=angleStep*i-Math.PI/2;
+const bx=cx+200*Math.cos(angle)-60,by=cy+200*Math.sin(angle)-20;
+const bid=createNode(bx,by,b.name,'branch');
+addLine(centerId,bid);
+b.subs.forEach((s,j)=>{
+const sa=angle+(j-1)*0.35;
+const sx=bx+60+130*Math.cos(sa)-40,sy=by+20+130*Math.sin(sa)-15;
+const sid=createNode(sx,sy,s,'leaf');
+addLine(bid,sid);
+});
+});
+}
+
+// Load default template
+window.onload=()=>setTimeout(()=>loadTemplate('startup'),300);
+</script>
+</body>
+</html>
